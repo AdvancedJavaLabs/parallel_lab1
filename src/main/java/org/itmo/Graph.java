@@ -6,8 +6,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 class Graph {
-    private int V;
-    private ArrayList<Integer>[] adjList;
+    private final int V;
+    private final ArrayList<Integer>[] adjList;
 
     Graph(int vertices) {
         this.V = vertices;
@@ -30,7 +30,7 @@ class Graph {
     void bfs(int startVertex) {
         boolean[] visited = new boolean[V];
 
-        LinkedList<Integer> queue = new LinkedList<Integer>();
+        LinkedList<Integer> queue = new LinkedList<>();
 
         visited[startVertex] = true;
         queue.add(startVertex);

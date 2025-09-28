@@ -5,18 +5,24 @@ import org.junit.jupiter.api.Test;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.Buffer;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.function.BiFunction;
+import java.util.stream.IntStream;
 
 public class BFSTest {
 
     @Test
     public void bfsTest() throws IOException {
-        int[] sizes = new int[]{10, 100, 1000, 10_000, 10_000, 50_000, 100_000};
-        int[] connections = new int[]{50, 500, 5000, 50_000, 100_000, 1_000_000, 1_000_000};
+        int[] sizes = new int[]{10, 100, 1000, 10_000, 10_000, 50_000, 100_000, 1_000_000, 2_000_000};
+        int[] connections = new int[]{50, 500, 5000, 50_000, 100_000, 1_000_000, 1_000_000, 10_000_000, 10_000_000};
         Random r = new Random(42);
         try (FileWriter fw = new FileWriter("tmp/results.txt")) {
             for (int i = 0; i < sizes.length; i++) {
-                Graph g = generateGraph(r, sizes[i], connections[i]);
+                System.out.println("--------------------------");
+                System.out.println("Generating graph of size " + sizes[i] + " ...wait");
+                Graph g = new RandomGraphGenerator().generateGraph(r, sizes[i], connections[i]);
+                System.out.println("Generation completed!\nStarting bfs");
                 long serialTime = executeSerialBfsAndGetTime(g);
                 long parallelTime = executeParallelBfsAndGetTime(g);
                 fw.append("Times for " + sizes[i] + " vertices and " + connections[i] + " connections: ");
@@ -28,13 +34,6 @@ public class BFSTest {
         }
     }
 
-    private Graph generateGraph(Random r, int size, int numOfConnections) {
-        Graph graph = new Graph(size);
-        for (int i = 0; i < numOfConnections; i++) {
-            graph.addEdge(r.nextInt(size), r.nextInt(size));
-        }
-        return graph;
-    }
 
     private long executeSerialBfsAndGetTime(Graph g) {
         long startTime = System.currentTimeMillis();
