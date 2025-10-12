@@ -7,7 +7,8 @@ import java.util.concurrent.atomic.AtomicIntegerArray;
 class Graph {
     private final int V;
     private final ArrayList<Integer>[] adjList;
-    private final int threadPoolCount = 32;
+
+    private int threadPoolCount = 32;
 
     Graph(int vertices) {
         this.V = vertices;
@@ -23,7 +24,7 @@ class Graph {
         }
     }
 
-    void parallelBFS(int startVertex) {
+    int parallelBFS(int startVertex) {
         ExecutorService exec = Executors.newFixedThreadPool(threadPoolCount);
 
         try {
@@ -72,8 +73,65 @@ class Graph {
 
                 currentEdges = newCurrentEdges;
             }
+
+            int totalVisited = 0;
+            for (int i = 0; i < visited.length(); i++) {
+                if (visited.get(i) != 0) {
+                    totalVisited++;
+                }
+            }
+            return totalVisited == V ? 1 : 0;
         } catch (InterruptedException e) {
             System.out.println("Главный поток был прерван при наполнении локальных границ");
+        } finally {
+            exec.shutdown();
+        }
+
+        return 0;
+    }
+
+    int parallelBFSWithBugs(int startVertex) {
+        ExecutorService exec = Executors.newFixedThreadPool(threadPoolCount);
+
+        try {
+            int[] visited = new int[V];
+
+            visited[startVertex] = 1;
+            List<Integer> currentEdges = new ArrayList<>();
+            currentEdges.add(startVertex);
+
+            while (!currentEdges.isEmpty()) {
+                List<Integer> currentEdgesStamp = currentEdges;
+                int chunk = (currentEdges.size() - 1 + threadPoolCount) / threadPoolCount;
+
+                List<Integer> nextEdge = new ArrayList<>();
+                currentEdges = nextEdge;
+
+                for (int i = 0; i < threadPoolCount; i++) {
+                    int from = i * chunk;
+                    int to = Math.min(currentEdges.size(), from + chunk);
+
+                    exec.execute(() -> {
+                        for (int j = from; j < to; j++) {
+                            int localEdge = currentEdgesStamp.get(j);
+                            for (int k : adjList[localEdge]) {
+                                if (visited[k] == 0) {
+                                    nextEdge.add(k);
+                                    visited[k] = 1;
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+
+            int totalVisited = 0;
+            for (int i = 0; i < visited.length; i++) {
+                if (visited[i] != 0) {
+                    totalVisited++;
+                }
+            }
+            return totalVisited == V ? 1 : 0;
         } finally {
             exec.shutdown();
         }
@@ -100,4 +158,7 @@ class Graph {
         }
     }
 
+    void setThreadPoolCount(int threadPoolCount) {
+        this.threadPoolCount = Math.max(1, threadPoolCount);
+    }
 }

@@ -12,6 +12,7 @@ repositories {
 }
 
 dependencies {
+    implementation("org.knowm.xchart:xchart:3.8.7")
     testImplementation(kotlin("test"))
     testImplementation("org.openjdk.jcstress:jcstress-core:0.16")
     testAnnotationProcessor("org.openjdk.jcstress:jcstress-core:0.16")
