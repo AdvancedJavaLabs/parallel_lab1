@@ -1,13 +1,15 @@
 package org.itmo;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class UnsafeCounter {
-    private int counter = 0;
+    private AtomicInteger counter = new AtomicInteger(0);
 
     public void increment() {
-        counter++; // <-- гонка данных
+        counter.incrementAndGet();
     }
 
     public int get() {
-        return counter;
+        return counter.get();
     }
 }
