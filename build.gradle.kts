@@ -21,8 +21,14 @@ tasks.test {
     useJUnitPlatform()
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
 kotlin {
-    jvmToolchain(8)
+    jvmToolchain(21)
 }
 
 application {

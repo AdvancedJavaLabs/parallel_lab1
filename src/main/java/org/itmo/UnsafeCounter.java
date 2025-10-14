@@ -4,7 +4,7 @@ public class UnsafeCounter {
     private int counter = 0;
 
     public void increment() {
-        counter++; // <-- гонка данных
+        counter++;
     }
 
     public int get() {
